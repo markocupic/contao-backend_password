@@ -27,18 +27,18 @@
  */
 
 
-class BackendPassword extends Backend
+class BackendPassword extends \Backend
 {
 
 	public function handleLoginScreen($strBuffer, $strTemplate)
 	{
-		if (BackendUser::getInstance()->id == 0 && $this->Input->get('pwrecovery'))
+		if (BackendUser::getInstance()->id == 0 && \Input::get('pwrecovery'))
 		{
-			if ($this->Input->get('token') != '')
+			if (\Input::get('token') != '')
 			{
 				return $this->setNewPassword();
 			}
-			elseif ($this->Input->post('FORM_SUBMIT') == 'tl_pwrecovery' && $this->Input->post('username') != '' && $this->Input->post('email') != '')
+			elseif (\Input::post('FORM_SUBMIT') == 'tl_pwrecovery' && \Input::post('email'))
 			{
 				$this->sendPasswordLink();
 			}
@@ -53,10 +53,10 @@ class BackendPassword extends Backend
 			$this->Template->charset = $GLOBALS['TL_CONFIG']['characterSet'];
 			$this->Template->action = ampersand($this->Environment->request);
 			$this->Template->headline = $GLOBALS['TL_LANG']['MSC']['pwrecovery'];
-			$this->Template->curUsername = $this->Input->post('username') ? $this->Input->post('username') : '';
-			$this->Template->curEmail = $this->Input->post('email') ? $this->Input->post('email') : '';
-			$this->Template->uClass = ($_POST && !$this->Input->post('username')) ? ' class="login_error"' : '';
-			$this->Template->eClass = ($_POST && !$this->Input->post('email')) ? ' class="login_error"' : '';
+			$this->Template->curUsername = \Input::post('username') ? \Input::post('username') : '';
+			$this->Template->curEmail = \Input::post('email') ? \Input::post('email') : '';
+			$this->Template->uClass = ($_POST && !\Input::post('username')) ? ' class="login_error"' : '';
+			$this->Template->eClass = ($_POST && !\Input::post('email')) ? ' class="login_error"' : '';
 			$this->Template->recoverButton = specialchars($GLOBALS['TL_LANG']['MSC']['recoverBT']);
 			$this->Template->username = $GLOBALS['TL_LANG']['tl_user']['username'][0];
 			$this->Template->email = $GLOBALS['TL_LANG']['tl_user']['email'][0];
@@ -78,9 +78,9 @@ class BackendPassword extends Backend
 	{
 		$time = time();
 
-		$objUser = $this->Database->prepare("SELECT * FROM tl_user WHERE username=? AND email=? AND disable='' AND (start='' OR start<$time) AND (stop='' OR stop>$time)")
+		$objUser = $this->Database->prepare("SELECT * FROM tl_user WHERE email=? AND disable='' AND (start='' OR start<$time) AND (stop='' OR stop>$time)")
 								  ->limit(1)
-								  ->execute($this->Input->post('username'), $this->Input->post('email'));
+								  ->execute(\Input::post('email'));
 
 		if ($objUser->numRows)
 		{
@@ -120,7 +120,7 @@ class BackendPassword extends Backend
 
 		$objUser = $this->Database->prepare("SELECT * FROM tl_user WHERE activation=? AND disable='' AND (start='' OR start<$time) AND (stop='' OR stop>$time)")
 								  ->limit(1)
-								  ->execute($this->Input->get('token'));
+								  ->execute(\Input::get('token'));
 
 		if (!$objUser->numRows)
 		{
@@ -128,13 +128,13 @@ class BackendPassword extends Backend
 			die('Not found');
 		}
 
-		if ($this->Input->post('FORM_SUBMIT') == 'tl_password')
+		if (\Input::post('FORM_SUBMIT') == 'tl_password')
 		{
-			$pw = $this->Input->post('password');
-			$cnf = $this->Input->post('confirm');
+			$pw = \Input::post('password');
+			$cnf = \Input::post('confirm');
 
 			// Do not allow special characters
-			if (preg_match('/[#\(\)\/<=>]/', html_entity_decode($this->Input->post('password'))))
+			if (preg_match('/[#\(\)\/<=>]/', html_entity_decode(\Input::post('password'))))
 			{
 				$_SESSION['PW_ERROR'][] = $GLOBALS['TL_LANG']['ERR']['extnd'];
 			}
@@ -166,11 +166,10 @@ class BackendPassword extends Backend
 				}
 				else
 				{
-					$strSalt = substr(md5(uniqid(mt_rand(), true)), 0, 23);
-					$strPassword = sha1($strSalt . $pw);
+					$strPassword = \Encryption::hash($pw);
 
 					$this->Database->prepare("UPDATE tl_user SET password=?, activation='', loginCount=3, locked=0 WHERE id=?")
-								   ->execute($strPassword . ':' . $strSalt, $objUser->id);
+								   ->execute($strPassword, $objUser->id);
 
 					$this->addConfirmationMessage($GLOBALS['TL_LANG']['MSC']['pw_changed']);
 					$this->redirect('contao/index.php');

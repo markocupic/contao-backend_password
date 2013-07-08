@@ -1,27 +1,35 @@
 <!DOCTYPE html>
 <html lang="<?php echo $this->language; ?>">
 <head>
-<meta charset="<?php echo $this->charset; ?>">
-<title><?php echo $this->title; ?> - Contao Open Source CMS <?php echo VERSION; ?></title>
-<base href="<?php echo $this->base; ?>">
-<link rel="stylesheet" href="<?php
-  $objCombiner = new Combiner();
-  $objCombiner->add('plugins/stylect/css/stylect.css');
-  $objCombiner->add('system/themes/'. $this->theme .'/basic.css');
-  $objCombiner->add('system/themes/'. $this->theme .'/login.css');
-  echo $objCombiner->getCombinedFile();
-?>" media="all">
-<!--[if IE]><link rel="stylesheet" href="<?php echo TL_SCRIPT_URL; ?>system/themes/<?php echo $this->theme; ?>/iefixes.css"><![endif]-->
-<script><?php echo $this->getLocaleString(); ?></script>
-<script src="<?php
-  $objCombiner = new Combiner();
-  $objCombiner->add('plugins/mootools/' . MOOTOOLS . '/mootools-core.js', MOOTOOLS_CORE);
-  $objCombiner->add('plugins/mootools/' . MOOTOOLS . '/mootools-more.js', MOOTOOLS_MORE);
-  $objCombiner->add('plugins/stylect/js/stylect.js');
-  $objCombiner->add('contao/contao.js');
-  echo $objCombiner->getCombinedFile();
-?>"></script>
-<!--[if lt IE 9]><script src="<?php echo TL_PLUGINS_URL; ?>plugins/html5shim/html5-<?php echo HTML5SHIM; ?>.js"></script><![endif]-->
+
+  <meta charset="<?php echo $this->charset; ?>">
+  <title><?php echo $this->title; ?> - Contao Open Source CMS <?php echo VERSION; ?></title>
+  <base href="<?php echo $this->base; ?>">
+  <meta name="generator" content="Contao Open Source CMS">
+
+  <link rel="stylesheet" href="<?php
+    $objCombiner = new Combiner();
+    $objCombiner->add('assets/mootools/stylect/css/stylect.css');
+    $objCombiner->add('system/themes/'. $this->theme .'/basic.css');
+    $objCombiner->add('system/themes/'. $this->theme .'/login.css');
+    echo $objCombiner->getCombinedFile();
+  ?>">
+  <!--[if IE]><link rel="stylesheet" href="<?php echo TL_ASSETS_URL; ?>system/themes/<?php echo $this->theme; ?>/iefixes.css"><![endif]-->
+  <?php echo $this->stylesheets; ?>
+
+  <script><?php echo $this->getLocaleString(); ?></script>
+  <script src="<?php
+    $objCombiner = new Combiner();
+    $objCombiner->add('assets/mootools/core/' . MOOTOOLS . '/mootools.js', MOOTOOLS);
+    $objCombiner->add('assets/mootools/stylect/js/stylect.js');
+    $objCombiner->add('assets/mootools/mootao/Mootao.js');
+    $objCombiner->add('assets/contao/js/core.js');
+    echo $objCombiner->getCombinedFile();
+  ?>"></script>
+  <script><?php echo $this->getDateString(); ?></script>
+  <?php echo $this->javascripts; ?>
+  <!--[if lt IE 9]><script src="<?php echo TL_ASSETS_URL; ?>assets/html5shiv/<?php echo HTML5SHIV; ?>/html5shiv.js"></script><![endif]-->
+
 </head>
 <body class="__ua__">
 
@@ -49,10 +57,6 @@
 <?php endif; ?>
 
 <table class="tl_login_table">
-<tr>
-  <td<?php echo $this->uClass; ?>><label for="username"><?php echo $this->username; ?></label></td>
-  <td style="text-align:right"><input type="text" name="username" id="username" class="tl_text" value="<?php echo $this->curUsername; ?>" maxlength="64" required></td>
-</tr>
 <tr>
   <td<?php echo $this->eClass; ?>><label for="email"><?php echo $this->email; ?></label></td>
   <td style="text-align:right"><input type="email" name="email" id="email" class="tl_text" value="<?php echo $this->curEmail; ?>" maxlength="255" required></td>
@@ -95,20 +99,7 @@ window.addEvent('domready', function() {
   $('email').focus();
 });
 </script>
-<?php if (!$this->disableCron): ?>
 
-<script>
-new Request({
-  url:'system/html/cron.txt',
-  onComplete: function(txt) {
-    if (!txt) txt = 0;
-    if (parseInt(txt) < (Date.now()/1000 - 300)) {
-      new Request({url:'cron.php'}).send();
-    }
-  }
-}).send();
-</script>
-<?php endif; ?>
 
 </body>
 </html>
